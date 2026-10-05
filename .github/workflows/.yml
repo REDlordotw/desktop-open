@@ -5,11 +5,17 @@ on:
     - cron: "0 0 * * *" # Запускать каждый день в полночь
   workflow_dispatch: # Позволяет запускать вручную
 
+# Добавляем права на запись в репозиторий
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Generate Snake
         uses: Platane/snk@v3
         id: snake-gif
@@ -18,10 +24,11 @@ jobs:
           outputs: |
             dist/snake.svg
             dist/snake-dark.svg?palette=github-dark
+
       - name: Push to output branch
         uses: crazy-max/ghaction-github-pages@v4
         with:
-          target_branch: output # Создаст ветку 'output'
+          target_branch: output # Создаст или обновит ветку 'output'
           build_dir: dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
