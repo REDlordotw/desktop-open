@@ -1,34 +1,51 @@
-name: Update Calendar Badge
+name: Generate Snake Animation
 
 on:
+  # Запуск по расписанию (каждый день в полночь)
   schedule:
-    - cron: "0 0 * * *" # Запускать каждый день в полночь
-  workflow_dispatch: # Позволяет запускать вручную
+    - cron: "0 0 * * *"
+  
+  # Возможность запускать вручную
+  workflow_dispatch:
+  
+  # Запуск при пуше в ветку main
+  push:
+    branches:
+      - main
 
-# Добавляем права на запись в репозиторий
+# Предоставляем права на запись в репозиторий
 permissions:
   contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
+      # 1. Клонируем репозиторий
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Создаем директорию для файла, если её нет
+      - name: Create assets directory
+        run: mkdir -p .github/assets
+
+      # 3. Генерируем SVG-файлы прямо в папки репозитория
       - name: Generate Snake
         uses: Platane/snk@v3
-        id: snake-gif
         with:
           github_user_name: ${{ github.repository_owner }}
           outputs: |
-            dist/snake.svg
-            dist/snake-dark.svg?palette=github-dark
+            .github/assets/snake.svg
+            .github/assets/snake-dark.svg?palette=github-dark
 
-      - name: Push to output branch
-        uses: crazy-max/ghaction-github-pages@v4
-        with:
-          target_branch: output # Создаст или обновит ветку 'output'
-          build_dir: dist
+      # 4. Коммитим и пушим изменения напрямую в ветку main
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .github/assets/snake.svg .github/assets/snake-dark.svg
+          git diff --staged --quiet || (git commit -m "chore: update snake animation" && git push)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
