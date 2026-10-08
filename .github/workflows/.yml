@@ -31,4 +31,4 @@ jobs:
           target_branch: output # Создаст или обновит ветку 'output'
           build_dir: dist
         env:
-          GITHUB_TOKEN: ${{ secrets.CUSTOM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
